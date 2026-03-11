@@ -1,0 +1,68 @@
+{
+	"actions": [],
+	"creation": "2026-03-11 00:00:00",
+	"doctype": "DocType",
+	"editable_grid": 1,
+	"engine": "InnoDB",
+	"field_order": ["service_plan", "service_description", "billing_cycle", "unit_price", "quantity", "total"],
+	"fields": [
+		{
+			"fieldname": "service_plan",
+			"fieldtype": "Link",
+			"label": "Plano de Serviço",
+			"options": "MZ SaaS Plan",
+			"reqd": 1,
+			"in_list_view": 1
+		},
+		{
+			"fieldname": "service_description",
+			"fieldtype": "Data",
+			"label": "Descrição",
+			"fetch_from": "service_plan.description",
+			"fetch_if_empty": 1,
+			"in_list_view": 1
+		},
+		{
+			"fieldname": "billing_cycle",
+			"fieldtype": "Select",
+			"label": "Ciclo de Facturação",
+			"options": "Monthly\nQuarterly\nAnnual",
+			"fetch_from": "service_plan.billing_cycle",
+			"fetch_if_empty": 1,
+			"in_list_view": 1
+		},
+		{
+			"fieldname": "unit_price",
+			"fieldtype": "Currency",
+			"label": "Preço Unitário",
+			"fetch_from": "service_plan.price",
+			"fetch_if_empty": 1,
+			"in_list_view": 1
+		},
+		{
+			"fieldname": "quantity",
+			"fieldtype": "Int",
+			"label": "Quantidade",
+			"default": "1",
+			"in_list_view": 1
+		},
+		{
+			"fieldname": "total",
+			"fieldtype": "Currency",
+			"label": "Total",
+			"read_only": 1,
+			"in_list_view": 1
+		}
+	],
+	"istable": 1,
+	"links": [],
+	"modified": "2026-03-11 00:00:00",
+	"modified_by": "Administrator",
+	"module": "MZ SaaS",
+	"name": "MZ Contract Service Line",
+	"owner": "Administrator",
+	"permissions": [],
+	"sort_field": "modified",
+	"sort_order": "DESC",
+	"states": []
+}

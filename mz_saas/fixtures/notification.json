@@ -1,0 +1,77 @@
+[
+	{
+		"doctype": "Notification",
+		"name": "MZ SaaS - Boas-Vindas",
+		"subject": "Bem-vindo ao MozEconomia Cloud — Contrato {{ doc.name }}",
+		"document_type": "Contract",
+		"event": "Submit",
+		"method": "",
+		"message_type": "Email",
+		"send_to_all_assignees": 0,
+		"enabled": 1,
+		"condition": "doc.party_type == 'Customer' and doc.mz_customer_email",
+		"recipients": [
+			{
+				"receiver_by_document_field": "mz_customer_email"
+			}
+		],
+		"message": "<p>Prezado(a) {{ doc.party_name }},</p>\n<p>É com satisfação que confirmamos a activação do seu contrato <strong>{{ doc.name }}</strong> no MozEconomia Cloud.</p>\n<p><strong>Detalhes do Contrato:</strong></p>\n<ul>\n<li>Referência: {{ doc.name }}</li>\n<li>Data de Início: {{ frappe.format_date(doc.start_date) }}</li>\n{% if doc.end_date %}<li>Data de Fim: {{ frappe.format_date(doc.end_date) }}</li>{% endif %}\n</ul>\n<p>A nossa equipa está disponível para qualquer esclarecimento.</p>\n<p>Com os melhores cumprimentos,<br>Equipa MozEconomia Cloud<br>contacto@mozeconomia.co.mz</p>"
+	},
+	{
+		"doctype": "Notification",
+		"name": "MZ SaaS - Lembrete de Fatura",
+		"subject": "Lembrete: Fatura {{ doc.name }} vence em 7 dias",
+		"document_type": "Sales Invoice",
+		"event": "Days Before",
+		"days_in_advance": 7,
+		"date_changed": "due_date",
+		"message_type": "Email",
+		"send_to_all_assignees": 0,
+		"enabled": 1,
+		"condition": "doc.mz_saas_managed",
+		"recipients": [
+			{
+				"receiver_by_document_field": "contact_email"
+			}
+		],
+		"message": "<p>Prezado(a) Cliente,</p>\n<p>Informamos que a fatura <strong>{{ doc.name }}</strong> referente ao Contrato MozEconomia Cloud vence em <strong>7 dias</strong> ({{ frappe.format_date(doc.due_date) }}).</p>\n<p><strong>Valor em Dívida:</strong> {{ frappe.format_value(doc.outstanding_amount, {'fieldtype': 'Currency', 'currency': doc.currency}) }}</p>\n<p>Por favor proceda ao pagamento atempado para evitar interrupções no serviço.</p>\n<p>Com os melhores cumprimentos,<br>Equipa MozEconomia Cloud<br>contacto@mozeconomia.co.mz</p>"
+	},
+	{
+		"doctype": "Notification",
+		"name": "MZ SaaS - Fatura em Atraso (Cliente)",
+		"subject": "Fatura {{ doc.name }} em atraso — Acção necessária",
+		"document_type": "Sales Invoice",
+		"event": "Days After",
+		"days_in_advance": 1,
+		"date_changed": "due_date",
+		"message_type": "Email",
+		"send_to_all_assignees": 0,
+		"enabled": 1,
+		"condition": "doc.mz_saas_managed and doc.outstanding_amount > 0",
+		"recipients": [
+			{
+				"receiver_by_document_field": "contact_email"
+			}
+		],
+		"message": "<p>Prezado(a) Cliente,</p>\n<p>A fatura <strong>{{ doc.name }}</strong> encontra-se em atraso desde <strong>{{ frappe.format_date(doc.due_date) }}</strong>.</p>\n<p><strong>Valor em Dívida:</strong> {{ frappe.format_value(doc.outstanding_amount, {'fieldtype': 'Currency', 'currency': doc.currency}) }}</p>\n<p>Pedimos que regularize a situação com brevidade para evitar a suspensão do serviço.</p>\n<p>Se já efectuou o pagamento, por favor desconsidere esta mensagem.</p>\n<p>Com os melhores cumprimentos,<br>Equipa MozEconomia Cloud<br>contacto@mozeconomia.co.mz</p>"
+	},
+	{
+		"doctype": "Notification",
+		"name": "MZ SaaS - Alerta Interno Atraso",
+		"subject": "[ALERTA] Fatura {{ doc.name }} em atraso — {{ doc.customer_name }}",
+		"document_type": "Sales Invoice",
+		"event": "Days After",
+		"days_in_advance": 1,
+		"date_changed": "due_date",
+		"message_type": "Email",
+		"send_to_all_assignees": 0,
+		"enabled": 1,
+		"condition": "doc.mz_saas_managed and doc.outstanding_amount > 0",
+		"recipients": [
+			{
+				"receiver_by_document_field": "mz_sales_responsible_email"
+			}
+		],
+		"message": "<p>Alerta Interno — Fatura em Atraso</p>\n<p>O cliente <strong>{{ doc.customer_name }}</strong> tem a fatura <strong>{{ doc.name }}</strong> em atraso.</p>\n<ul>\n<li>Data de Vencimento: {{ frappe.format_date(doc.due_date) }}</li>\n<li>Valor em Dívida: {{ frappe.format_value(doc.outstanding_amount, {'fieldtype': 'Currency', 'currency': doc.currency}) }}</li>\n{% if doc.mz_contract %}<li>Contrato: {{ doc.mz_contract }}</li>{% endif %}\n</ul>\n<p>Por favor contacte o cliente e actualize o registo de revisão em MZ Overdue Review.</p>"
+	}
+]
