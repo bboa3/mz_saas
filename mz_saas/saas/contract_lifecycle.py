@@ -84,8 +84,10 @@ def _setup_subscription(doc):
 		"generate_invoice_at": "Beginning of the current subscription period",
 		"plans": plans,
 	})
+	# Subscription is not a submittable DocType — insert() is all that is needed.
+	# The controller automatically sets status="Active" during validate.
 	sub.insert(ignore_permissions=True)
-	sub.submit()
+	frappe.db.commit()
 
 	frappe.db.set_value("Contract", doc.name, "mz_linked_subscription", sub.name)
 	frappe.db.set_value("Contract", doc.name, "mz_service_status", "Active")
@@ -93,17 +95,19 @@ def _setup_subscription(doc):
 
 
 def _pause_subscription(doc):
-	"""Pause (cancel) the linked ERPNext Subscription."""
+	"""Cancel the linked ERPNext Subscription."""
 	sub_name = doc.get("mz_linked_subscription")
-	if not sub_name:
+	if not sub_name or not frappe.db.exists("Subscription", sub_name):
 		return
 	try:
 		sub = frappe.get_doc("Subscription", sub_name)
-		if sub.docstatus == 1:
-			sub.cancel()
+		if sub.status != "Cancelled":
+			sub.cancel_subscription()
+			sub.save(ignore_permissions=True)
+			frappe.db.commit()
 	except Exception:
 		frappe.log_error(
-			title=f"MZ SaaS: Failed to pause Subscription {sub_name}",
+			title=f"MZ SaaS: Failed to cancel Subscription {sub_name}",
 			message=frappe.get_traceback(),
 		)
 
@@ -114,5 +118,20 @@ def _cancel_subscription(doc):
 
 
 def _resume_subscription(doc):
-	"""Re-create the subscription when contract is reactivated."""
+	"""Restart or re-create the subscription when contract is reactivated."""
+	sub_name = doc.get("mz_linked_subscription")
+	if sub_name and frappe.db.exists("Subscription", sub_name):
+		try:
+			sub = frappe.get_doc("Subscription", sub_name)
+			if sub.status == "Cancelled":
+				sub.restart_subscription()
+				sub.save(ignore_permissions=True)
+				frappe.db.commit()
+			return
+		except Exception:
+			frappe.log_error(
+				title=f"MZ SaaS: Failed to restart Subscription {sub_name}",
+				message=frappe.get_traceback(),
+			)
+	# No existing subscription — create a new one
 	_setup_subscription(doc)
